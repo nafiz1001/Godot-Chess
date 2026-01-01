@@ -1,6 +1,10 @@
 @tool
 extends Node2D
 
+const SVG_SCALE = 1
+const WIDTH = SVG_SCALE * 270 / 6
+const HEIGHT = SVG_SCALE * 90 / 2
+
 static var texture = preload("res://Chess_Pieces_Sprite.svg")
 var atlas_texture = AtlasTexture.new()
 var sprite = Sprite2D.new()
@@ -35,4 +39,4 @@ func _ready() -> void:
 	add_child(sprite)
 
 func update_atlas():
-	atlas_texture.region = Rect2(135 * piece, 135 * colour, 135, 135)
+	atlas_texture.region = Rect2(WIDTH * piece, HEIGHT * colour, WIDTH, HEIGHT)

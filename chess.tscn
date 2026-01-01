@@ -6,11 +6,10 @@
 [node name="Chess" type="Node2D"]
 
 [node name="ChessBoard" type="Sprite2D" parent="."]
-position = Vector2(512, 512)
-scale = Vector2(1.2641975, 1.2641975)
+position = Vector2(405, 405)
 texture = ExtResource("1_r1ws2")
 
 [node name="ChessPiece" type="Node2D" parent="."]
-position = Vector2(71, 817)
+position = Vector2(52, 749)
 script = ExtResource("2_33xsb")
-piece = 5
+colour = null
