@@ -1,15 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://dcbn5u01yt7gj"]
+[gd_scene load_steps=4 format=3 uid="uid://dcbn5u01yt7gj"]
 
-[ext_resource type="Texture2D" uid="uid://cywldc1bxlxum" path="res://Chess_Board.svg" id="1_r1ws2"]
-[ext_resource type="Script" uid="uid://dwhd33ogxth2u" path="res://ChessPiece.gd" id="2_33xsb"]
+[ext_resource type="Script" uid="uid://16bsjxww2mog" path="res://chess.gd" id="1_s2frv"]
+[ext_resource type="PackedScene" uid="uid://dqrjcwmnooaoi" path="res://chess_piece.tscn" id="2_ycel0"]
+[ext_resource type="PackedScene" uid="uid://dlq0dhyv4kj86" path="res://chess_board.tscn" id="3_s2frv"]
 
 [node name="Chess" type="Node2D"]
+script = ExtResource("1_s2frv")
 
-[node name="ChessBoard" type="Sprite2D" parent="."]
+[node name="ChessPiece" parent="." instance=ExtResource("2_ycel0")]
+z_index = 1
 position = Vector2(405, 405)
-texture = ExtResource("1_r1ws2")
 
-[node name="ChessPiece" type="Node2D" parent="."]
-position = Vector2(52, 749)
-script = ExtResource("2_33xsb")
-colour = null
+[node name="ChessBoard" parent="." instance=ExtResource("3_s2frv")]
+position = Vector2(405, 405)
