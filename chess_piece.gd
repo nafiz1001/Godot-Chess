@@ -9,20 +9,20 @@ static var texture = preload("res://Chess_Pieces_Sprite.svg")
 var atlas_texture = AtlasTexture.new()
 var sprite = Sprite2D.new()
 
-enum ChessPiece {KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN}
-enum ChessColour {WHITE, BLACK}
+enum Type {KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN}
+enum Colour {WHITE, BLACK}
 
-var _piece: ChessPiece = ChessPiece.KING
-var _colour: ChessColour = ChessColour.WHITE
+var _type: Type = Type.KING
+var _colour: Colour = Colour.WHITE
 
-@export var piece: ChessPiece:
+@export var type: Type:
 	get():
-		return _piece
+		return _type
 	set(value):
-		_piece = value
+		_type = value
 		update_atlas()
 
-@export var colour: ChessColour:
+@export var colour: Colour:
 	get():
 		return _colour
 	set(value):
@@ -32,11 +32,11 @@ var _colour: ChessColour = ChessColour.WHITE
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	atlas_texture.atlas = texture
-	piece = _piece
+	type = _type
 	colour = _colour
 	
 	sprite.texture = atlas_texture
 	add_child(sprite)
 
 func update_atlas():
-	atlas_texture.region = Rect2(LENGTH * piece, LENGTH * colour, LENGTH, LENGTH)
+	atlas_texture.region = Rect2(LENGTH * type, LENGTH * colour, LENGTH, LENGTH)

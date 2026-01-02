@@ -9,3 +9,5 @@ script = ExtResource("1_p4xb6")
 [node name="Sprite" type="Sprite2D" parent="."]
 position = Vector2(405, 405)
 texture = ExtResource("2_01178")
+
+[node name="Cells" type="Node" parent="."]
