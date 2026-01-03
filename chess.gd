@@ -43,6 +43,14 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	piece.global_position = cell.global_position
 	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
 	piece.square = cell.name
+	piece.press_chess_piece.connect(press_chess_piece)
+	piece.release_chess_piece.connect(release_chess_piece)
 
 	$Pieces.add_child(piece)
 	return piece
+
+func press_chess_piece(chess_piece_node: ChessPieceNode, original_position: Vector2):
+	print("press ", chess_piece_node.name)
+
+func release_chess_piece(chess_piece_node: ChessPieceNode, current_position: Vector2):
+	print("release ", chess_piece_node.name)
