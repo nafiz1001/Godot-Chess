@@ -16,6 +16,10 @@ func _ready() -> void:
 	add_child(chess_board)
 
 func reset_cells():
+	for cell in chess_board.find_child("Cells").get_children():
+		for child in cell.get_children():
+			child.queue_free()
+	
 	var back_line_types = [
 		ChessPieceType.ROOK,
 		ChessPieceType.KNIGHT,
