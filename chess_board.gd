@@ -12,10 +12,10 @@ const ROWS =    ['8', '7', '6', '5', '4', '3', '2', '1']
 func _ready() -> void:
 	for row in range(8):
 		for col in range(8):
-			var node = Node2D.new()
-			node.position = Vector2(CELL_LENGTH * col + CELL_LENGTH / 2, CELL_LENGTH * row + CELL_LENGTH / 2)
-			node.name = indices_to_coordinates(col, row)
-			$Cells.add_child(node)
+			var cell = Node2D.new()
+			cell.position = Vector2(CELL_LENGTH * col + CELL_LENGTH / 2, CELL_LENGTH * row + CELL_LENGTH / 2)
+			cell.name = indices_to_coords(col, row)
+			$Cells.add_child(cell)
 
 	if Engine.is_editor_hint():
 		add_markers()
@@ -24,5 +24,8 @@ func add_markers():
 	for cell in $Cells.get_children():
 		cell.add_child(Marker2D.new())
 
-func indices_to_coordinates(col: int, row: int):
+func indices_to_coords(col: int, row: int):
 	return COLUMNS[col] + ROWS[row]
+
+func get_cell(col: int, row: int):
+	return $Cells.find_child(indices_to_coords(col, row), false, false)

@@ -12,14 +12,10 @@ var chess_board: ChessBoardNode = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	chess_board = chess_board_res.instantiate()
-	chess_board.ready.connect(reset_cells)
+	chess_board.ready.connect(ready_after_chess_board_ready)
 	add_child(chess_board)
 
-func reset_cells():
-	for cell in chess_board.find_child("Cells").get_children():
-		for child in cell.get_children():
-			child.queue_free()
-	
+func ready_after_chess_board_ready():
 	var back_line_types = [
 		ChessPieceType.ROOK,
 		ChessPieceType.KNIGHT,
@@ -31,22 +27,21 @@ func reset_cells():
 		ChessPieceType.ROOK
 	]
 	for col in range(8):
-		var piece: ChessPieceNode = chess_piece_res.instantiate()
-		piece.type = back_line_types[col]
-		piece.colour = ChessColour.WHITE
-		chess_board.find_child("Cells").find_child(ChessBoardNode.COLUMNS[col] + "8", false, false).add_child(piece)
-	for col in range(8):
-		var piece: ChessPieceNode = chess_piece_res.instantiate()
-		piece.type = ChessPieceType.PAWN
-		piece.colour = ChessColour.WHITE
-		chess_board.find_child("Cells").find_child(ChessBoardNode.COLUMNS[col] + "7", false, false).add_child(piece)
-	for col in range(8):
-		var piece: ChessPieceNode = chess_piece_res.instantiate()
-		piece.type = ChessPieceType.PAWN
-		piece.colour = ChessColour.BLACK
-		chess_board.find_child("Cells").find_child(ChessBoardNode.COLUMNS[col] + "2", false, false).add_child(piece)
-	for col in range(8):
-		var piece: ChessPieceNode = chess_piece_res.instantiate()
-		piece.type = back_line_types[col]
-		piece.colour = ChessColour.BLACK
-		chess_board.find_child("Cells").find_child(ChessBoardNode.COLUMNS[col] + "1", false, false).add_child(piece)
+		initialize_piece(back_line_types[col], ChessColour.WHITE, col, 0)
+		initialize_piece(ChessPieceType.PAWN, ChessColour.WHITE, col, 1)
+		initialize_piece(ChessPieceType.PAWN, ChessColour.BLACK, col, 6)
+		initialize_piece(back_line_types[col], ChessColour.BLACK, col, 7)
+
+func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: int):
+	var col_name = ChessBoardNode.COLUMNS[col]
+	var row_name = ChessBoardNode.ROWS[row]
+	var piece: ChessPieceNode = chess_piece_res.instantiate()
+	var cell: Node2D = chess_board.get_cell(col, row)
+
+	piece.type = type
+	piece.colour = colour
+	piece.global_position = cell.global_position
+	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
+
+	$Pieces.add_child(piece)
+	
