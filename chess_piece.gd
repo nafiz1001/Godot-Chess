@@ -15,6 +15,8 @@ enum Colour {WHITE, BLACK}
 var _type: Type = Type.KING
 var _colour: Colour = Colour.WHITE
 
+var square: String # e.g. A1
+
 @export var type: Type:
 	get():
 		return _type

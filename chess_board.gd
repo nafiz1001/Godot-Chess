@@ -32,5 +32,6 @@ static func create_area2d():
 	var shape = CollisionShape2D.new()
 	shape.shape = RectangleShape2D.new()
 	shape.shape.size = Vector2(CELL_LENGTH, CELL_LENGTH)
+	shape.debug_color = Color(randf(), randf(), randf(), 0.25)
 	area.add_child(shape)
 	return area
