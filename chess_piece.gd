@@ -39,6 +39,13 @@ func _ready() -> void:
 	
 	sprite.texture = atlas_texture
 	add_child(sprite)
+	
+	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
 
 func update_atlas():
 	atlas_texture.region = Rect2(LENGTH * type, LENGTH * colour, LENGTH, LENGTH)
+
+signal chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent)
+
+func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	chess_piece_input_event.emit(self, event)
