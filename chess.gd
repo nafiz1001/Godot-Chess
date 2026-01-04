@@ -44,7 +44,7 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	piece.colour = colour
 	piece.global_position = cell.global_position
 	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
-	piece.square = cell.name
+	piece.square = Vector2i(col, row)
 	piece.z_index = 1
 	piece.chess_piece_input_event.connect(chess_piece_input_event)
 
