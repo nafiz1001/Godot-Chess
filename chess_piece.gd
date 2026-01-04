@@ -41,6 +41,7 @@ func _ready() -> void:
 	add_child(sprite)
 	
 	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
+	$Area2D/CollisionShape2D.debug_color = Color(randf(), randf(), randf(), 0.25)
 
 func update_atlas():
 	atlas_texture.region = Rect2(LENGTH * type, LENGTH * colour, LENGTH, LENGTH)
