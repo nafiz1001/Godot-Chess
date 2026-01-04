@@ -16,6 +16,8 @@ func _ready() -> void:
 	add_child(chess_board)
 
 func ready_after_chess_board_ready():
+	chess_board.chess_board_cell_input_event.connect(chess_board_cell_input_event)
+	
 	var back_line_types = [
 		ChessPieceType.ROOK,
 		ChessPieceType.KNIGHT,
@@ -43,6 +45,7 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	piece.global_position = cell.global_position
 	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
 	piece.square = cell.name
+	piece.z_index = 1
 	piece.chess_piece_input_event.connect(chess_piece_input_event)
 
 	$Pieces.add_child(piece)
@@ -61,3 +64,7 @@ func chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent
 		else:
 			_pressed_on_piece = null
 			_clicked_on_piece = null
+
+func chess_board_cell_input_event(cell: Sprite2D, event: InputEvent):
+	if event is InputEventMouseButton:
+		print("cell ", cell.name)

@@ -1,13 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dlq0dhyv4kj86"]
+[gd_scene load_steps=2 format=3 uid="uid://dlq0dhyv4kj86"]
 
 [ext_resource type="Script" uid="uid://da6cmyko7y6xn" path="res://chess_board.gd" id="1_p4xb6"]
-[ext_resource type="Texture2D" uid="uid://cywldc1bxlxum" path="res://Chess_Board.svg" id="2_01178"]
 
 [node name="ChessBoard" type="Node2D"]
 script = ExtResource("1_p4xb6")
-
-[node name="Sprite" type="Sprite2D" parent="."]
-position = Vector2(405, 405)
-texture = ExtResource("2_01178")
 
 [node name="Cells" type="Node" parent="."]
