@@ -2,12 +2,10 @@
 class_name ChessPieceNode
 extends Node2D
 
-const SVG_SCALE = 2
-const LENGTH = SVG_SCALE * 45
+const PADDING = 10
+const LENGTH = ChessBoardNode.CELL_LENGTH - PADDING
 
-static var texture = preload("res://Chess_Pieces_Sprite.svg")
-var atlas_texture = AtlasTexture.new()
-var sprite = Sprite2D.new()
+static var textures: Dictionary[String, Texture2D] = {}
 
 enum Type {KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN}
 enum Colour {WHITE, BLACK}
@@ -15,36 +13,40 @@ enum Colour {WHITE, BLACK}
 var _type: Type = Type.KING
 var _colour: Colour = Colour.WHITE
 
-var square: Vector2i # (col, row)
+var cell: Node2D
 
 @export var type: Type:
 	get():
 		return _type
 	set(value):
 		_type = value
-		update_atlas()
+		update_texture()
 
 @export var colour: Colour:
 	get():
 		return _colour
 	set(value):
 		_colour = value
-		update_atlas()
+		update_texture()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	atlas_texture.atlas = texture
 	type = _type
 	colour = _colour
+	update_texture()
 	
-	sprite.texture = atlas_texture
-	add_child(sprite)
-	
-	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
+	#$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
 	$Area2D/CollisionShape2D.debug_color = Color(randf(), randf(), randf(), 0.25)
 
-func update_atlas():
-	atlas_texture.region = Rect2(LENGTH * type, LENGTH * colour, LENGTH, LENGTH)
+func update_texture():
+	if textures.is_empty():
+		for c in Colour.keys():
+			for t in Type.keys():
+				var filename = (c as String).substr(0, 1).to_lower() + "_" + (t as String).to_lower()
+				textures[c + "-" + t] = load("res://Chess_Pieces/" + filename + ".png")
+
+	$Sprite2D.texture = textures[Colour.keys()[colour] + "-" + Type.keys()[type]]
+	$Sprite2D.scale = Vector2(LENGTH/$Sprite2D.texture.get_size().x, LENGTH/$Sprite2D.texture.get_size().y)
 
 signal chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent)
 

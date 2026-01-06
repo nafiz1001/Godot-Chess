@@ -1,2 +1,2 @@
-Chess_Board.svg: https://commons.wikimedia.org/wiki/File:Chess_Board.svg
 Chess_Pieces_Sprite.svg: https://commons.wikimedia.org/wiki/File:Chess_Pieces_Sprite.svg
+Chess_Pieces/*: https://opengameart.org/content/chess-pieces-and-board-squares (https://opengameart.org/sites/default/files/johnpablok_cburnett_chess-v2.zip)

@@ -44,27 +44,39 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	piece.colour = colour
 	piece.global_position = cell.global_position
 	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
-	piece.square = Vector2i(col, row)
+	piece.cell = cell
 	piece.z_index = 1
-	piece.chess_piece_input_event.connect(chess_piece_input_event)
+	# don't handle input event of individual chess piece, instead handle event on each cell
+	#piece.chess_piece_input_event.connect(chess_piece_input_event)
 
 	$Pieces.add_child(piece)
 	return piece
 
-var _pressed_on_piece: ChessPieceNode = null
-var _clicked_on_piece: ChessPieceNode = null
-func chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent):
+func on_cell_click(cell: Node2D):
+	print(cell.name)
+
+# don't handle input event of individual chess piece, instead handle event on each cell
+#var _pressed_on_piece: ChessPieceNode = null
+#var _clicked_on_piece: ChessPieceNode = null
+#func chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent):
+	#if event is InputEventMouseButton:
+		#if event.pressed:
+			#_pressed_on_piece = chess_piece_node
+		#elif chess_piece_node == _pressed_on_piece:
+			#_pressed_on_piece = null
+			#_clicked_on_piece = chess_piece_node
+			#print(chess_piece_node.name)
+		#else:
+			#_pressed_on_piece = null
+			#_clicked_on_piece = null
+
+var _pressed_on_cell: Node2D = null
+func chess_board_cell_input_event(cell: Node2D, event: InputEvent):
 	if event is InputEventMouseButton:
 		if event.pressed:
-			_pressed_on_piece = chess_piece_node
-		elif chess_piece_node == _pressed_on_piece:
-			_pressed_on_piece = null
-			_clicked_on_piece = chess_piece_node
-			print(chess_piece_node.name)
+			_pressed_on_cell = cell
+		elif cell == _pressed_on_cell:
+			_pressed_on_cell = null
+			on_cell_click(cell)
 		else:
-			_pressed_on_piece = null
-			_clicked_on_piece = null
-
-func chess_board_cell_input_event(cell: Sprite2D, event: InputEvent):
-	if event is InputEventMouseButton:
-		print("cell ", cell.name)
+			_pressed_on_cell = null

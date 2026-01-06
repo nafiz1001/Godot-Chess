@@ -14,6 +14,8 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_l4lp4")
-debug_color = Color(0.82221925, 0.39264813, 0.22831377, 0.25)
+debug_color = Color(0.14612724, 0.110996954, 0.746865, 0.25)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
 
 [connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

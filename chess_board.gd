@@ -12,7 +12,7 @@ const ROWS =    ['8', '7', '6', '5', '4', '3', '2', '1']
 static var white_cell_texture = GradientTexture2D.new()
 static var black_cell_texture = GradientTexture2D.new()
 
-signal chess_board_cell_input_event(cell: Sprite2D, event: InputEvent)
+signal chess_board_cell_input_event(cell: Node2D, event: InputEvent)
 
 func _ready() -> void:
 	white_cell_texture.width = 1
@@ -26,7 +26,7 @@ func _ready() -> void:
 	black_cell_texture.fill_from = Vector2(0, 0)
 	black_cell_texture.fill_to = Vector2(1, 0)
 	black_cell_texture.gradient = Gradient.new()
-	
+
 	for row in range(8):
 		for col in range(8):
 			var cell = create_cell(col, row)
@@ -45,12 +45,15 @@ func get_cell(col: int, row: int):
 	return $Cells.find_child(indices_to_coords(col, row), false, false)
 
 func create_cell(col: int, row: int):
+	var cell = Node2D.new()
+	cell.scale = Vector2(CELL_LENGTH, CELL_LENGTH)
+
 	var sprite = Sprite2D.new()
 	if (col + row * 8 + (row % 2)) % 2 == 0:
 		sprite.texture = white_cell_texture
 	else:
 		sprite.texture = black_cell_texture
-	sprite.scale = Vector2(CELL_LENGTH, CELL_LENGTH)
+	cell.add_child(sprite)
 
 	var area = Area2D.new()
 	var shape = CollisionShape2D.new()
@@ -58,12 +61,11 @@ func create_cell(col: int, row: int):
 	shape.shape.size = Vector2(1, 1)
 	shape.debug_color = Color(randf(), randf(), randf(), 0.25)
 	area.add_child(shape)
-
-	sprite.add_child(area)
 	
 	area.input_pickable = true
 	var input_event = func (_viewport: Node, event: InputEvent, _shape_idx: int):
-		chess_board_cell_input_event.emit(sprite, event)
+		chess_board_cell_input_event.emit(cell, event)
 	area.input_event.connect(input_event)
+	cell.add_child(area)
 
-	return sprite
+	return cell
