@@ -1,8 +1,32 @@
-[gd_scene load_steps=2 format=3 uid="uid://dlq0dhyv4kj86"]
+[gd_scene load_steps=6 format=3 uid="uid://dlq0dhyv4kj86"]
 
+[ext_resource type="Shader" uid="uid://b1ffnfas7rrre" path="res://checkerboard.gdshader" id="1_guywq"]
 [ext_resource type="Script" uid="uid://da6cmyko7y6xn" path="res://chess_board.gd" id="1_p4xb6"]
 
-[node name="ChessBoard" type="Node2D"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p4xb6"]
+shader = ExtResource("1_guywq")
+shader_parameter/square_count = 8
+shader_parameter/color1 = Color(1, 1, 1, 1)
+shader_parameter/color2 = Color(0, 0, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_01178"]
+size = Vector2(1024, 1024)
+center_offset = Vector3(512, 512, 0)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_guywq"]
+size = Vector2(1024, 1024)
+
+[node name="Chess_Board" type="Node2D"]
 script = ExtResource("1_p4xb6")
 
-[node name="Cells" type="Node" parent="."]
+[node name="MeshInstance2D" type="MeshInstance2D" parent="."]
+material = SubResource("ShaderMaterial_p4xb6")
+mesh = SubResource("QuadMesh_01178")
+
+[node name="Area2D" type="Area2D" parent="."]
+position = Vector2(512, 512)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_guywq")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

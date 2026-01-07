@@ -3,69 +3,29 @@ class_name ChessBoardNode
 extends Node2D
 
 const BORDER_PADDING = 0
-const LENGTH = (810 - BORDER_PADDING*2)
+const LENGTH = (1024 - BORDER_PADDING*2)
 const CELL_LENGTH = LENGTH / 8
 
 const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 const ROWS =    ['8', '7', '6', '5', '4', '3', '2', '1']
 
-static var white_cell_texture = GradientTexture2D.new()
-static var black_cell_texture = GradientTexture2D.new()
+signal input_event(viewport: Node, event: InputEvent, shape_idx: int)
 
-signal chess_board_cell_input_event(cell: Node2D, event: InputEvent)
+# key is coordinates
+var chess_pieces: Dictionary[String, ChessPieceNode] = {}
 
-func _ready() -> void:
-	white_cell_texture.width = 1
-	white_cell_texture.height = 1
-	white_cell_texture.fill_from = Vector2(1, 1)
-	white_cell_texture.fill_to = Vector2(1, 0)
-	white_cell_texture.gradient = Gradient.new()
-	
-	black_cell_texture.width = 1
-	black_cell_texture.height = 1
-	black_cell_texture.fill_from = Vector2(0, 0)
-	black_cell_texture.fill_to = Vector2(1, 0)
-	black_cell_texture.gradient = Gradient.new()
+func square_to_global_position(square: Vector2i) -> Vector2:
+	return (Vector2(square.x * CELL_LENGTH, square.y * CELL_LENGTH)
+		+ Vector2(CELL_LENGTH, CELL_LENGTH) / 2
+		+ position)
 
-	for row in range(8):
-		for col in range(8):
-			var cell = create_cell(col, row)
-			cell.position = Vector2(CELL_LENGTH * (col + 0.5) + BORDER_PADDING, CELL_LENGTH * (row + 0.5) + BORDER_PADDING)
-			cell.name = indices_to_coords(col, row)
-			$Cells.add_child(cell)
+func global_position_to_square(_position: Vector2) -> Vector2i:
+	var relative_position = _position - position
+	return Vector2i(floor(relative_position.x / CELL_LENGTH), floor(relative_position.y / CELL_LENGTH))
 
-func add_markers():
-	for cell in $Cells.get_children():
-		cell.add_child(Marker2D.new())
-
-func indices_to_coords(col: int, row: int):
+static func indices_to_coords(col: int, row: int) -> String:
 	return COLUMNS[col] + ROWS[row]
 
-func get_cell(col: int, row: int):
-	return $Cells.find_child(indices_to_coords(col, row), false, false)
 
-func create_cell(col: int, row: int):
-	var cell = Node2D.new()
-	cell.scale = Vector2(CELL_LENGTH, CELL_LENGTH)
-
-	var sprite = Sprite2D.new()
-	if (col + row * 8 + (row % 2)) % 2 == 0:
-		sprite.texture = white_cell_texture
-	else:
-		sprite.texture = black_cell_texture
-	cell.add_child(sprite)
-
-	var area = Area2D.new()
-	var shape = CollisionShape2D.new()
-	shape.shape = RectangleShape2D.new()
-	shape.shape.size = Vector2(1, 1)
-	shape.debug_color = Color(randf(), randf(), randf(), 0.25)
-	area.add_child(shape)
-	
-	area.input_pickable = true
-	var input_event = func (_viewport: Node, event: InputEvent, _shape_idx: int):
-		chess_board_cell_input_event.emit(cell, event)
-	area.input_event.connect(input_event)
-	cell.add_child(area)
-
-	return cell
+func _on_area_2d_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
+	input_event.emit(viewport, event, shape_idx)

@@ -13,7 +13,7 @@ enum Colour {WHITE, BLACK}
 var _type: Type = Type.KING
 var _colour: Colour = Colour.WHITE
 
-var cell: Node2D
+var square: Vector2i
 
 @export var type: Type:
 	get():
