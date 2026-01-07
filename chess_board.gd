@@ -11,9 +11,6 @@ const ROWS =    ['8', '7', '6', '5', '4', '3', '2', '1']
 
 signal input_event(viewport: Node, event: InputEvent, shape_idx: int)
 
-# key is coordinates
-var chess_pieces: Dictionary[String, ChessPieceNode] = {}
-
 func square_to_global_position(square: Vector2i) -> Vector2:
 	return (Vector2(square.x * CELL_LENGTH, square.y * CELL_LENGTH)
 		+ Vector2(CELL_LENGTH, CELL_LENGTH) / 2

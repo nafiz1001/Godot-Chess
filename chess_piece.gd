@@ -35,8 +35,20 @@ func _ready() -> void:
 	colour = _colour
 	update_texture()
 	
-	#$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
+	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
 	$Area2D/CollisionShape2D.debug_color = Color(randf(), randf(), randf(), 0.25)
+
+static func is_move_valid(piece: ChessPieceNode, from: Vector2i, to: Vector2i):
+	# white is assumed to be from the bottom
+	# black is assumed to be from the top
+	if piece.type == Type.PAWN:
+		var diff = to - from
+		if piece.colour == Colour.WHITE:
+			return diff.x == 0 and diff.y <= -1 and diff.y >= -2
+		else:
+			return diff.x == 0 and diff.y >= 1 and diff.y <= 2
+	else:
+		return false
 
 func update_texture():
 	if textures.is_empty():
