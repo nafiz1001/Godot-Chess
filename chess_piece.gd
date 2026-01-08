@@ -2,8 +2,17 @@
 class_name ChessPieceNode
 extends Node2D
 
-const PADDING = 10
-const LENGTH = ChessBoardNode.CELL_LENGTH - PADDING
+# must be set before being added as a child
+var chess_board: ChessBoardNode = null
+
+@export var PADDING = 10
+var LENGTH: float:
+	get():
+		return (
+			chess_board.GLOBAL_CELL_LENGTH
+			if not Engine.is_editor_hint()
+			else float(1024) / float(8)
+		) - PADDING
 
 static var textures: Dictionary[String, Texture2D] = {}
 
@@ -38,17 +47,42 @@ func _ready() -> void:
 	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
 	$Area2D/CollisionShape2D.debug_color = Color(randf(), randf(), randf(), 0.25)
 
-static func is_move_valid(piece: ChessPieceNode, from: Vector2i, to: Vector2i):
+static func is_move_valid(piece: ChessPieceNode, from: Vector2i, existing_piece: ChessPieceNode, to: Vector2i):
 	# white is assumed to be from the bottom
 	# black is assumed to be from the top
-	if piece.type == Type.PAWN:
-		var diff = to - from
-		if piece.colour == Colour.WHITE:
-			return diff.x == 0 and diff.y <= -1 and diff.y >= -2
-		else:
-			return diff.x == 0 and diff.y >= 1 and diff.y <= 2
-	else:
+
+	if existing_piece != null and existing_piece.colour == piece.colour:
 		return false
+
+	var delta = to - from
+	match piece.type:
+		Type.PAWN:
+			var direction = -1 if piece.colour == Colour.WHITE else 1
+			# move forward
+			if delta.x == 0:
+				if existing_piece != null:
+					return false
+				if delta.y == direction:
+					return true
+				if (piece.colour == Colour.WHITE and from.y == 6) or (piece.colour == Colour.BLACK and from.y == 1):
+					if delta.y == 2 * direction:
+						return true
+			# capture diagonally
+			elif abs(delta.x) == 1 and delta.y == direction:
+				if existing_piece != null and existing_piece.colour != piece.colour:
+					return true
+			return false
+		Type.ROOK:
+			return delta.x == 0 or delta.y == 0
+		Type.KNIGHT:
+			return (abs(delta.x) == 2 and abs(delta.y) == 1) or (abs(delta.x) == 1 and abs(delta.y) == 2)
+		Type.BISHOP:
+			return abs(delta.x) == abs(delta.y)
+		Type.QUEEN:
+			return delta.x == 0 or delta.y == 0 or abs(delta.x) == abs(delta.y)
+		Type.KING:
+			return abs(delta.x) <= 1 and abs(delta.y) <= 1
+	return false
 
 func update_texture():
 	if textures.is_empty():

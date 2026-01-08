@@ -16,11 +16,9 @@ var active_chess_pieces: Dictionary[String, ChessPieceNode] = {}
 func _ready() -> void:
 	chess_board = chess_board_scene.instantiate()
 	chess_board.name = "Chess_Board"
-	chess_board.ready.connect(ready_after_chess_board_ready)
 	add_child(chess_board)
 
-func ready_after_chess_board_ready():
-	chess_board.input_event.connect(chess_board_event)
+	chess_board.on_square_click.connect(on_square_click)
 	
 	var back_line_types = [
 		ChessPieceType.ROOK,
@@ -63,7 +61,14 @@ var active_piece: ChessPieceNode = null
 func on_square_click(new_square: Vector2i):
 	var new_coords = ChessBoardNode.indices_to_coords(new_square.x, new_square.y)
 	var existing_piece = active_chess_pieces.get(new_coords, null)
-	if active_piece and ChessPieceNode.is_move_valid(active_piece, active_square, new_square):
+	var is_move_valid = (
+		active_piece != null
+		and ChessPieceNode.is_move_valid(active_piece, active_square, new_square)
+		and (existing_piece == null or existing_piece.colour != active_piece.colour)
+		and (active_piece.type != ChessPieceNode.Type.PAWN
+			or (existing_piece == null and new_square.x == active_square.x)
+			or (existing_piece != null and new_square.x != active_square.x and abs(new_square.y - active_square.y) == 1)))
+	if is_move_valid:
 		# put at new position
 		active_piece.position = chess_board.square_to_global_position(new_square)
 		# put at new square and replace whatever is existing
@@ -80,15 +85,3 @@ func on_square_click(new_square: Vector2i):
 	else:
 		active_piece = existing_piece
 		active_square = new_square
-
-var _pressed_on_square = null
-func chess_board_event(_viewport: Node, event: InputEvent, _shape_idx: int):
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		var square = chess_board.global_position_to_square(event.global_position)
-		if event.pressed:
-			_pressed_on_square = square
-		elif _pressed_on_square != null and square == _pressed_on_square:
-			_pressed_on_square = null
-			on_square_click(square)
-		else:
-			_pressed_on_square = null
