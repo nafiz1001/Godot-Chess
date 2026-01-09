@@ -34,6 +34,14 @@ func global_position_to_square(_position: Vector2) -> Vector2i:
 
 static func indices_to_coords(col: int, row: int) -> String:
 	return COLUMNS[col] + ROWS[row]
+static func vec_to_coords(square: Vector2i) -> String:
+	return indices_to_coords(square.x, square.y)
+static func coords_to_vec(coords: String) -> Vector2i:
+	var col = COLUMNS.find(coords.substr(0, 1))
+	var row = ROWS.find(coords.substr(1, 1))
+	return Vector2i(col, row)
+static func out_of_bounds(square: Vector2i) -> bool:
+	return square.x < 0 or square.x >= 8 or square.y < 0 or square.y >= 8
 
 signal on_square_click(square: Vector2i)
 var _pressed_on_square = null

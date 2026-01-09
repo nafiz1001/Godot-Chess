@@ -1,4 +1,5 @@
 @tool
+class_name ChessNode
 extends Node2D
 
 const chess_board_scene = preload("res://chess_board.tscn")
@@ -7,14 +8,14 @@ const chess_piece_res = preload("res://chess_piece.tscn")
 const ChessPieceType = ChessPieceNode.Type
 const ChessColour = ChessPieceNode.Colour
 
-var chess_board: ChessBoardNode = null
+var chess_board: ChessBoardNode
 
 # key is coordinates
 var active_chess_pieces: Dictionary[String, ChessPieceNode] = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	chess_board = chess_board_scene.instantiate()
+	chess_board = chess_board_scene.instantiate() as ChessBoardNode
 	chess_board.name = "Chess_Board"
 	add_child(chess_board)
 
@@ -40,13 +41,12 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	var square = Vector2i(col, row)
 	var col_name = ChessBoardNode.COLUMNS[col]
 	#var row_name = ChessBoardNode.ROWS[row]
-	var piece: ChessPieceNode = chess_piece_res.instantiate()
+	var piece = chess_piece_res.instantiate() as ChessPieceNode
 
 	piece.type = type
 	piece.colour = colour
 	piece.global_position = chess_board.square_to_global_position(square)
 	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
-	piece.square = Vector2i(col, row)
 	piece.z_index = 1
 	# don't handle input event of individual chess piece, instead handle event on each square
 	#piece.chess_piece_input_event.connect(chess_piece_input_event)
@@ -57,31 +57,6 @@ func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: 
 	return piece
 
 var active_square = null
-var active_piece: ChessPieceNode = null
+var active_piece: ChessPieceNode
 func on_square_click(new_square: Vector2i):
-	var new_coords = ChessBoardNode.indices_to_coords(new_square.x, new_square.y)
-	var existing_piece = active_chess_pieces.get(new_coords, null)
-	var is_move_valid = (
-		active_piece != null
-		and ChessPieceNode.is_move_valid(active_piece, active_square, new_square)
-		and (existing_piece == null or existing_piece.colour != active_piece.colour)
-		and (active_piece.type != ChessPieceNode.Type.PAWN
-			or (existing_piece == null and new_square.x == active_square.x)
-			or (existing_piece != null and new_square.x != active_square.x and abs(new_square.y - active_square.y) == 1)))
-	if is_move_valid:
-		# put at new position
-		active_piece.position = chess_board.square_to_global_position(new_square)
-		# put at new square and replace whatever is existing
-		active_chess_pieces[new_coords] = active_piece
-		# erase from last square
-		active_chess_pieces.erase(ChessBoardNode.indices_to_coords(active_square.x, active_square.y))
-
-		if existing_piece:
-			# hide killed piece
-			existing_piece.global_position = Vector2(-100000, -100000)
-
-		active_piece = null
-		active_square = null
-	else:
-		active_piece = existing_piece
-		active_square = new_square
+	pass

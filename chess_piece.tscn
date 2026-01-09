@@ -15,7 +15,7 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_l4lp4")
-debug_color = Color(0.29698294, 0.24144784, 0.3500341, 0.25)
+debug_color = Color(0.14305927, 0.2755307, 0.816876, 0.25)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.116256155, 0.115234375)
