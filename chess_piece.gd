@@ -3,7 +3,7 @@ class_name ChessPieceNode
 extends Node2D
 
 # must be set before being added as a child
-var chess_board: ChessBoardNode
+static var chess_board: ChessBoardNode
 
 @export var PADDING = 10
 var LENGTH: float:
@@ -36,7 +36,6 @@ var _colour: Colour = Colour.WHITE
 		_colour = value
 		update_texture()
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	type = _type
 	colour = _colour
@@ -56,7 +55,7 @@ func update_texture():
 	$Sprite2D.scale = Vector2(LENGTH/$Sprite2D.texture.get_size().x, LENGTH/$Sprite2D.texture.get_size().y)
 
 # to avoid infinite recursion when checking king moves
-var controlled_king: ChessPieceNode = null
+static var controlled_king: ChessPieceNode = null
 func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceNode]) -> Array[Array]:
 	var _moves: Array[Array] = []
 	match type:
@@ -76,6 +75,9 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 				var double_forward_coords = ChessBoardNode.vec_to_coords(double_forward_square)
 				if square.y == start_row and not active_chess_pieces.has(double_forward_coords):
 					forward_moves.append(double_forward_square)
+			
+			if not forward_moves.is_empty():
+				_moves.append(forward_moves)
 			
 			for horizontal_move in [-1, 1]:
 				var attack_square = square + Vector2i(horizontal_move, direction)
@@ -169,7 +171,7 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			for coords in active_chess_pieces.keys():
 				var other_piece = active_chess_pieces[coords]
 				if other_piece.colour != colour:
-					if other_piece.type == Type.KING and other_piece == controlled_king:
+					if other_piece == controlled_king:
 						# base case to avoid infinite recursion
 						continue
 					var other_piece_moves = other_piece.moves(
