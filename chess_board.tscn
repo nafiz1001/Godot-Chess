@@ -31,4 +31,6 @@ monitorable = false
 position = Vector2(512, 512)
 shape = SubResource("RectangleShape2D_guywq")
 
+[node name="Cells" type="Node" parent="."]
+
 [connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

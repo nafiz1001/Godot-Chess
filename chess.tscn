@@ -6,3 +6,5 @@
 script = ExtResource("1_s2frv")
 
 [node name="Pieces" type="Node" parent="."]
+
+[node name="Hints" type="Node" parent="."]

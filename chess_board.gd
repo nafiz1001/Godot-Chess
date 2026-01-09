@@ -1,8 +1,6 @@
 class_name ChessBoardNode
 extends Node2D
 
-const BORDER_PADDING = 0
-
 var LENGTH: float:
 	get():
 		return ($MeshInstance2D.mesh as PlaneMesh).size.x

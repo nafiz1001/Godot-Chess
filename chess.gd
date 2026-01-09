@@ -67,17 +67,33 @@ func on_square_click(new_square: Vector2i):
 			active_square = new_square
 			active_piece = active_chess_pieces[new_coords]
 			active_piece.modulate = Color(0.8, 0.8, 1, 1)
-			print("Selected piece at ", new_coords)
-			print("Piece type: ", active_piece.type, " Colour: ", active_piece.colour)
-			print("Possible moves: ", active_piece.moves(active_square, active_chess_pieces))
+			print("Selected a ",
+				ChessColour.keys()[active_piece.colour],
+				" ",
+				ChessPieceType.keys()[active_piece.type],
+				" at ", new_coords
+			)
+			for child in $Hints.get_children():
+				child.queue_free()
+			for path in active_piece.moves(active_square, active_chess_pieces):
+				for move in path:
+					# highlight possible moves
+					var highlight = MeshInstance2D.new()
+					var plane_mesh = QuadMesh.new()
+					plane_mesh.size = Vector2(chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING, chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING)
+					highlight.mesh = plane_mesh
+					highlight.position = chess_board.square_to_global_position(move)
+					highlight.modulate = Color(1, 0, 0, 0.25) if active_chess_pieces.has(ChessBoardNode.vec_to_coords(move)) else Color(0, 1, 0, 0.25)
+					highlight.z_index = 1
+					$Hints.add_child(highlight)
 	else:
 		var new_piece = active_chess_pieces.get(new_coords, null)
 		if new_piece != null and new_piece.colour == active_piece.colour:
 			# select different piece
 			active_piece.modulate = Color(1, 1, 1, 1)
-			active_square = new_square
-			active_piece = new_piece
-			active_piece.modulate = Color(0.8, 0.8, 1, 1)
+			active_piece = null
+			active_square = null
+			on_square_click(new_square)
 		else:
 			# try to move piece
 			var moves = active_piece.moves(active_square, active_chess_pieces)
