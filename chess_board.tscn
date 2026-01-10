@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://dlq0dhyv4kj86"]
 
 [ext_resource type="Shader" uid="uid://b1ffnfas7rrre" path="res://checkerboard.gdshader" id="1_guywq"]
-[ext_resource type="Script" uid="uid://da6cmyko7y6xn" path="res://chess_board.gd" id="1_p4xb6"]
+[ext_resource type="Script" uid="uid://da6cmyko7y6xn" path="res://chess_board_node.gd" id="1_p4xb6"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p4xb6"]
 shader = ExtResource("1_guywq")

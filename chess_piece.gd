@@ -1,62 +1,15 @@
-@tool
-class_name ChessPieceNode
-extends Node2D
-
-# must be set before being added as a child
-static var chess_board: ChessBoardNode
-
-@export var PADDING = 10
-var LENGTH: float:
-	get():
-		return (
-			chess_board.GLOBAL_CELL_LENGTH
-			if not Engine.is_editor_hint()
-			else float(1024) / float(8)
-		) - PADDING
-
-static var textures: Dictionary[String, Texture2D] = {}
+class_name ChessPiece
+extends Object
 
 enum Type {KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN}
 enum Colour {WHITE, BLACK}
 
-var _type: Type = Type.KING
-var _colour: Colour = Colour.WHITE
+var type: Type = Type.KING
+var colour: Colour = Colour.WHITE
 
-@export var type: Type:
-	get():
-		return _type
-	set(value):
-		_type = value
-		update_texture()
-
-@export var colour: Colour:
-	get():
-		return _colour
-	set(value):
-		_colour = value
-		update_texture()
-
-func _ready() -> void:
-	type = _type
-	colour = _colour
-	update_texture()
-	
-	$Area2D/CollisionShape2D.shape.size = Vector2(LENGTH, LENGTH)
-	$Area2D/CollisionShape2D.debug_color = Color(randf(), randf(), randf(), 0.25)
-
-func update_texture():
-	if textures.is_empty():
-		for c in Colour.keys():
-			for t in Type.keys():
-				var filename = (c as String).substr(0, 1).to_lower() + "_" + (t as String).to_lower()
-				textures[c + "-" + t] = load("res://Chess_Pieces/" + filename + ".png")
-
-	$Sprite2D.texture = textures[Colour.keys()[colour] + "-" + Type.keys()[type]]
-	$Sprite2D.scale = Vector2(LENGTH/$Sprite2D.texture.get_size().x, LENGTH/$Sprite2D.texture.get_size().y)
-
-# to avoid infinite recursion when checking king moves
-static var controlled_king: ChessPieceNode = null
-func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceNode]) -> Array[Array]:
+# to help avoid infinite recursion when checking king valid_moves
+static var controlled_king: ChessPiece = null
+func valid_moves(square: Vector2i, chess_pieces: Array[ChessPiece]) -> Array[Array]:
 	var _moves: Array[Array] = []
 	match type:
 		Type.PAWN:
@@ -64,16 +17,15 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			var start_row = 6 if colour == Colour.WHITE else 1
 
 			var forward_moves: Array[Vector2i] = []
+
 			var forward_square = square + Vector2i(0, direction)
-			if not ChessBoardNode.out_of_bounds(forward_square):
-				var forward_coords = ChessBoardNode.vec_to_coords(forward_square)
-				if not active_chess_pieces.has(forward_coords):
+			if not ChessBoard.out_of_bounds(forward_square):
+				if not chess_pieces[ChessBoard.vec_to_index(forward_square)]:
 					forward_moves.append(forward_square)
 
 			var double_forward_square = square + Vector2i(0, 2 * direction)
-			if not ChessBoardNode.out_of_bounds(double_forward_square):
-				var double_forward_coords = ChessBoardNode.vec_to_coords(double_forward_square)
-				if square.y == start_row and not active_chess_pieces.has(double_forward_coords):
+			if not ChessBoard.out_of_bounds(double_forward_square):
+				if square.y == start_row and not chess_pieces[ChessBoard.vec_to_index(double_forward_square)]:
 					forward_moves.append(double_forward_square)
 			
 			if not forward_moves.is_empty():
@@ -81,9 +33,9 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			
 			for horizontal_move in [-1, 1]:
 				var attack_square = square + Vector2i(horizontal_move, direction)
-				if not ChessBoardNode.out_of_bounds(attack_square):
-					var attack_coords = ChessBoardNode.vec_to_coords(attack_square)
-					if active_chess_pieces.has(attack_coords) and active_chess_pieces[attack_coords].colour != colour:
+				if not ChessBoard.out_of_bounds(attack_square):
+					var attack_index = ChessBoard.vec_to_index(attack_square)
+					if chess_pieces[attack_index] and chess_pieces[attack_index].colour != colour:
 						_moves.append([attack_square])
 
 		Type.ROOK:
@@ -91,12 +43,12 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			for direction in directions:
 				var path: Array[Vector2i] = []
 				var current_square = square + direction
-				while not ChessBoardNode.out_of_bounds(current_square):
-					var coords = ChessBoardNode.vec_to_coords(current_square)
-					if active_chess_pieces.has(coords):
-						if active_chess_pieces[coords].colour != colour:
+				while not ChessBoard.out_of_bounds(current_square):
+					var index = ChessBoard.vec_to_index(current_square)
+					if chess_pieces[index]:
+						if chess_pieces[index].colour != colour:
 							path.append(current_square)
-						break
+						break # stop searching in this direction (while loop)
 					else:
 						path.append(current_square)
 					current_square += direction
@@ -110,9 +62,9 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			]
 			for move in knight_moves:
 				var target_square = square + move
-				if not ChessBoardNode.out_of_bounds(target_square):
-					var coords = ChessBoardNode.vec_to_coords(target_square)
-					if not active_chess_pieces.has(coords) or active_chess_pieces[coords].colour != colour:
+				if not ChessBoard.out_of_bounds(target_square):
+					var index = ChessBoard.vec_to_index(target_square)
+					if not chess_pieces[index] or chess_pieces[index].colour != colour:
 						_moves.append([target_square])
 
 		Type.BISHOP:
@@ -120,12 +72,12 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			for direction in directions:
 				var path: Array[Vector2i] = []
 				var current_square = square + direction
-				while not ChessBoardNode.out_of_bounds(current_square):
-					var coords = ChessBoardNode.vec_to_coords(current_square)
-					if active_chess_pieces.has(coords):
-						if active_chess_pieces[coords].colour != colour:
+				while not ChessBoard.out_of_bounds(current_square):
+					var index = ChessBoard.vec_to_index(current_square)
+					if chess_pieces[index]:
+						if chess_pieces[index].colour != colour:
 							path.append(current_square)
-						break
+						break # stop searching in this direction (while loop)
 					else:
 						path.append(current_square)
 					current_square += direction
@@ -140,10 +92,10 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			for direction in directions:
 				var path: Array[Vector2i] = []
 				var current_square = square + direction
-				while not ChessBoardNode.out_of_bounds(current_square):
-					var coords = ChessBoardNode.vec_to_coords(current_square)
-					if active_chess_pieces.has(coords):
-						if active_chess_pieces[coords].colour != colour:
+				while not ChessBoard.out_of_bounds(current_square):
+					var index = ChessBoard.vec_to_index(current_square)
+					if chess_pieces[index]:
+						if chess_pieces[index].colour != colour:
 							path.append(current_square)
 						break
 					else:
@@ -162,26 +114,26 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 			]
 			for move in king_moves:
 				var target_square = square + move
-				if not ChessBoardNode.out_of_bounds(target_square):
-					var coords = ChessBoardNode.vec_to_coords(target_square)
-					if not active_chess_pieces.has(coords) or active_chess_pieces[coords].colour != colour:
+				if not ChessBoard.out_of_bounds(target_square):
+					var index = ChessBoard.vec_to_index(target_square)
+					if not chess_pieces[index] or chess_pieces[index].colour != colour:
 						_moves.append([target_square])
 
-			# Remove moves that would put king in check
-			for coords in active_chess_pieces.keys():
-				var other_piece = active_chess_pieces[coords]
-				if other_piece.colour != colour:
+			# Remove valid moves that would put king in check
+			for index in range(chess_pieces.size()):
+				var other_piece = chess_pieces[index]
+				if other_piece and other_piece.colour != colour:
 					if other_piece == controlled_king:
 						# base case to avoid infinite recursion
 						continue
-					var other_piece_moves = other_piece.moves(
-						ChessBoardNode.coords_to_vec(coords),
-						active_chess_pieces
+					var other_piece_moves = other_piece.valid_moves(
+						ChessBoard.index_to_vec(index),
+						chess_pieces
 					)
 					for path in other_piece_moves:
 						for attacked_square in path:
 							for king_path in _moves.duplicate():
-								# king only moves one square at a time
+								# king only valid_moves one square at a time
 								if king_path[0] == attacked_square:
 									_moves.erase(king_path)
 							
@@ -190,6 +142,16 @@ func moves(square: Vector2i, active_chess_pieces: Dictionary[String, ChessPieceN
 
 	return _moves			
 
-signal chess_piece_input_event(chess_piece_node: ChessPieceNode, event: InputEvent)
-func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	chess_piece_input_event.emit(self, event)
+func is_in_danger(square: Vector2i, chess_pieces: Array[ChessPiece]) -> bool:
+	for index in range(chess_pieces.size()):
+		var other_piece = chess_pieces[index]
+		if other_piece and other_piece.colour != colour:
+			var other_piece_moves = other_piece.valid_moves(
+				ChessBoard.index_to_vec(index),
+				chess_pieces
+			)
+			for path in other_piece_moves:
+				for attacked_square in path:
+					if attacked_square == square:
+						return true
+	return false

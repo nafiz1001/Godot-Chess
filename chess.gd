@@ -1,121 +1,75 @@
-@tool
-class_name ChessNode
-extends Node2D
-
-const chess_board_scene = preload("res://chess_board.tscn")
-const chess_piece_res = preload("res://chess_piece.tscn")
-
-const ChessPieceType = ChessPieceNode.Type
-const ChessColour = ChessPieceNode.Colour
-
-var chess_board: ChessBoardNode
-
-# key is coordinates
-var active_chess_pieces: Dictionary[String, ChessPieceNode] = {}
-
-func _ready() -> void:
-	chess_board = chess_board_scene.instantiate() as ChessBoardNode
-	chess_board.name = "Chess_Board"
-	add_child(chess_board)
+class_name Chess
+extends Object
 	
-	ChessPieceNode.chess_board = chess_board
+# index is from 0 to 63, starting from A8 to H1
+var pieces: Array[ChessPiece] = []
 
-	chess_board.on_square_click.connect(on_square_click)
-	
-	var back_line_types = [
-		ChessPieceType.ROOK,
-		ChessPieceType.KNIGHT,
-		ChessPieceType.BISHOP,
-		ChessPieceType.QUEEN,
-		ChessPieceType.KING,
-		ChessPieceType.BISHOP,
-		ChessPieceType.KNIGHT,
-		ChessPieceType.ROOK
-	]
-	for col in range(8):
-		initialize_piece(back_line_types[col], ChessColour.BLACK, col, 0)
-		initialize_piece(ChessPieceType.PAWN, ChessColour.BLACK, col, 1)
-		initialize_piece(ChessPieceType.PAWN, ChessColour.WHITE, col, 6)
-		initialize_piece(back_line_types[col], ChessColour.WHITE, col, 7)
+func _init():
+	for i in range(64):
+		pieces.append(null)
 
-func initialize_piece(type: ChessPieceType, colour: ChessColour, col: int, row: int):
-	var square = Vector2i(col, row)
-	var col_name = ChessBoardNode.COLUMNS[col]
-	#var row_name = ChessBoardNode.ROWS[row]
-	var piece = chess_piece_res.instantiate() as ChessPieceNode
+func get_piece_at(square: Vector2i) -> ChessPiece:
+	return pieces[ChessBoard.vec_to_index(square)]
 
-	piece.type = type
-	piece.colour = colour
-	piece.global_position = chess_board.square_to_global_position(square)
-	piece.name = ChessColour.keys()[colour] + "-" + ChessPieceType.keys()[type] + "-" + col_name
-	piece.z_index = 1
-	# don't handle input event of individual chess piece, instead handle event on each square
-	#piece.chess_piece_input_event.connect(chess_piece_input_event)
-	$Pieces.add_child(piece)
-	
-	active_chess_pieces[ChessBoardNode.indices_to_coords(col, row)] = piece
-	
-	return piece
+func set_piece_at(square: Vector2i, piece: ChessPiece) -> void:
+	pieces[ChessBoard.vec_to_index(square)] = piece
 
-var active_square = null
-var active_piece: ChessPieceNode
+signal on_select_piece(square: Vector2i, piece: ChessPiece)
+signal on_deselect_piece(square: Vector2i, piece: ChessPiece)
+signal on_remove_piece(square: Vector2i, piece: ChessPiece)
+signal on_place_piece(square: Vector2i, piece: ChessPiece)
+
+var selected_square = null # Vector2i | null
+var selected_piece: ChessPiece
 func on_square_click(new_square: Vector2i):
-	var new_coords = ChessBoardNode.vec_to_coords(new_square)
-	if active_piece == null or active_square == null:
-		# select piece
-		if active_chess_pieces.has(new_coords):
-			active_square = new_square
-			active_piece = active_chess_pieces[new_coords]
-			active_piece.modulate = Color(0.8, 0.8, 1, 1)
-			print("Selected a ",
-				ChessColour.keys()[active_piece.colour],
-				" ",
-				ChessPieceType.keys()[active_piece.type],
-				" at ", new_coords
-			)
-			for child in $Hints.get_children():
-				child.queue_free()
-			for path in active_piece.moves(active_square, active_chess_pieces):
-				for move in path:
-					# highlight possible moves
-					var highlight = MeshInstance2D.new()
-					var plane_mesh = QuadMesh.new()
-					plane_mesh.size = Vector2(chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING, chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING)
-					highlight.mesh = plane_mesh
-					highlight.position = chess_board.square_to_global_position(move)
-					highlight.modulate = Color(1, 0, 0, 0.25) if active_chess_pieces.has(ChessBoardNode.vec_to_coords(move)) else Color(0, 1, 0, 0.25)
-					highlight.z_index = 1
-					$Hints.add_child(highlight)
+	if selected_piece == null or selected_square == null:
+		# there are no pieces currently selected
+		if get_piece_at(new_square):
+			selected_square = new_square
+			selected_piece = get_piece_at(new_square)
+			on_select_piece.emit(selected_square, selected_piece)
+			# print("Selected a ",
+			# 	ChessColour.keys()[selected_piece.colour],
+			# 	" ",
+			# 	ChessPieceType.keys()[selected_piece.type],
+			# 	" at ", new_square
+			# )
 	else:
-		var new_piece = active_chess_pieces.get(new_coords, null)
-		if new_piece != null and new_piece.colour == active_piece.colour:
+		# there is a piece currently selected
+		var new_piece = get_piece_at(new_square)
+		if new_piece != null and new_piece.colour == selected_piece.colour:
 			# select different piece
-			active_piece.modulate = Color(1, 1, 1, 1)
-			active_piece = null
-			active_square = null
-			on_square_click(new_square)
+			var temp_square = selected_square
+			var temp_piece = selected_piece
+			selected_square = null
+			selected_piece = null
+			on_deselect_piece.emit(temp_square, temp_piece)
+			on_square_click(new_square) # recurse into selecting new piece
 		else:
-			# try to move piece
-			var moves = active_piece.moves(active_square, active_chess_pieces)
+			# test that the move is valid
+			var moves = selected_piece.valid_moves(selected_square, pieces)
 			for path in moves:
 				for move in path:
 					if move == new_square:
-						# move piece
-						var old_coords = ChessBoardNode.vec_to_coords(active_square)
-						active_piece.global_position = chess_board.square_to_global_position(new_square)
-						active_piece.modulate = Color(1, 1, 1, 1)
-						
-						active_chess_pieces.erase(old_coords)
+						# The move is valid. Proceed with the move.
+						var old_index = ChessBoard.vec_to_index(selected_square)						
+						pieces[old_index] = null
 
-						var captured_piece = active_chess_pieces.get(new_coords, null)
-						if captured_piece != null:
-							captured_piece.visible = false
-						active_chess_pieces[new_coords] = active_piece
+						var new_index = ChessBoard.vec_to_index(new_square)
 						
-						active_square = null
-						active_piece = null
+						var captured_piece = pieces[new_index]
+						if captured_piece != null:
+							pieces[new_index] = null
+							on_remove_piece.emit(new_square, captured_piece)
+						
+						pieces[new_index] = selected_piece
+						selected_square = null
+						selected_piece = null
+						on_place_piece.emit(new_square, pieces[new_index])
 						return
 			# deselect piece
-			active_piece.modulate = Color(1, 1, 1, 1)
-			active_square = null
-			active_piece = null
+			var temp_square = selected_square
+			var temp_piece = selected_piece
+			selected_square = null
+			selected_piece = null
+			on_deselect_piece.emit(temp_square, temp_piece)
