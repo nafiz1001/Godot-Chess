@@ -1,10 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://dcbn5u01yt7gj"]
+[gd_scene format=3 uid="uid://dcbn5u01yt7gj"]
 
-[ext_resource type="Script" uid="uid://d0a5jbmg43dhe" path="res://chess_node.gd" id="1_r1ws2"]
+[ext_resource type="Script" uid="uid://d0a5jbmg43dhe" path="res://scripts/chess_node.gd" id="1_r1ws2"]
 
-[node name="Chess" type="Node2D"]
+[node name="Chess" type="Node2D" unique_id=2027923180]
 script = ExtResource("1_r1ws2")
 
-[node name="Pieces" type="Node" parent="."]
+[node name="Pieces" type="Node" parent="." unique_id=11069339]
 
-[node name="Hints" type="Node" parent="."]
+[node name="Hints" type="Node" parent="." unique_id=1786629112]

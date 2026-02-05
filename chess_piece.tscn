@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dqrjcwmnooaoi"]
 
-[ext_resource type="Script" uid="uid://dwhd33ogxth2u" path="res://chess_piece_node.gd" id="1_l4lp4"]
+[ext_resource type="Script" uid="uid://dwhd33ogxth2u" path="res://scripts/chess_piece_node.gd" id="1_l4lp4"]
 [ext_resource type="Texture2D" uid="uid://cm6srqtigqhfi" path="res://Chess_Pieces/w_king.png" id="2_5nxdc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l4lp4"]

@@ -73,15 +73,18 @@ func on_select_piece(active_square: Vector2i, piece: ChessPiece):
 	)
 	for child in $Hints.get_children():
 		child.queue_free()
-	for path in piece.valid_moves(active_square, chess.pieces):
-		for move in path:
+
+	for path in chess.valid_moves_2(active_square):
+		for _move_object in path:
+			var move_object: ChessMove = _move_object
+
 			# highlight possible moves
 			var highlight = MeshInstance2D.new()
 			var plane_mesh = QuadMesh.new()
 			plane_mesh.size = Vector2(chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING, chess_board.GLOBAL_CELL_LENGTH - active_piece.PADDING)
 			highlight.mesh = plane_mesh
-			highlight.position = chess_board.square_to_global_position(move)
-			highlight.modulate = Color(1, 0, 0, 0.25) if chess.get_piece_at(move) else Color(0, 1, 0, 0.25)
+			highlight.position = chess_board.square_to_global_position(move_object.square)
+			highlight.modulate = Color(1, 0, 0, 0.25) if chess.get_piece_at(move_object.square) else Color(0, 1, 0, 0.25)
 			highlight.z_index = 1
 			$Hints.add_child(highlight)
 
